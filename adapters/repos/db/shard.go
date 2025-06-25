@@ -419,6 +419,10 @@ func (s *Shard) ObjectCountAsync() int {
 	return b.CountAsync()
 }
 
+func (s *Shard) isLoaded() bool {
+	return s.GetStatusNoLoad() == storagestate.StatusReady || s.GetStatusNoLoad() == storagestate.StatusReadOnly
+}
+
 func (s *Shard) ObjectStorageSize(ctx context.Context) int64 {
 	bucket := s.store.Bucket(helpers.ObjectsBucketLSM)
 	if bucket == nil {
