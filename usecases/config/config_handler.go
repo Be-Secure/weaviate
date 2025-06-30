@@ -23,7 +23,7 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 
 	"github.com/weaviate/weaviate/deprecations"
 	entcfg "github.com/weaviate/weaviate/entities/config"
@@ -367,6 +367,7 @@ type Persistence struct {
 	LSMCycleManagerRoutinesFactor                int    `json:"lsmCycleManagerRoutinesFactor" yaml:"lsmCycleManagerRoutinesFactor"`
 	IndexRangeableInMemory                       bool   `json:"indexRangeableInMemory" yaml:"indexRangeableInMemory"`
 	MinMMapSize                                  int64  `json:"minMMapSize" yaml:"minMMapSize"`
+	LazySegmentsDisabled                         bool   `json:"lazySegmentsDisabled" yaml:"lazySegmentsDisabled"`
 	MaxReuseWalSize                              int64  `json:"MaxReuseWalSize" yaml:"MaxReuseWalSize"`
 	HNSWMaxLogSize                               int64  `json:"hnswMaxLogSize" yaml:"hnswMaxLogSize"`
 	HNSWDisableSnapshots                         bool   `json:"hnswDisableSnapshots" yaml:"hnswDisableSnapshots"`

@@ -382,6 +382,7 @@ func MakeAppState(ctx context.Context, options *swag.CommandLineOptionsGroup) *s
 		MemtablesMinActiveSeconds:           appState.ServerConfig.Config.Persistence.MemtablesMinActiveDurationSeconds,
 		MemtablesMaxActiveSeconds:           appState.ServerConfig.Config.Persistence.MemtablesMaxActiveDurationSeconds,
 		MinMMapSize:                         appState.ServerConfig.Config.Persistence.MinMMapSize,
+		LazySegmentsDisabled:                appState.ServerConfig.Config.Persistence.LazySegmentsDisabled,
 		MaxReuseWalSize:                     appState.ServerConfig.Config.Persistence.MaxReuseWalSize,
 		SegmentsCleanupIntervalSeconds:      appState.ServerConfig.Config.Persistence.LSMSegmentsCleanupIntervalSeconds,
 		SeparateObjectsCompactions:          appState.ServerConfig.Config.Persistence.LSMSeparateObjectsCompactions,
@@ -1787,6 +1788,21 @@ func initRuntimeOverrides(appState *state.State) {
 		registered.QuerySlowLogThreshold = appState.ServerConfig.Config.QuerySlowLogThreshold
 		registered.InvertedSorterDisabled = appState.ServerConfig.Config.InvertedSorterDisabled
 
+		hooks := make(map[string]func() error)
+
+		if appState.OIDC.Config.Enabled {
+			registered.OIDCIssuer = appState.OIDC.Config.Issuer
+			registered.OIDCClientID = appState.OIDC.Config.ClientID
+			registered.OIDCSkipClientIDCheck = appState.OIDC.Config.SkipClientIDCheck
+			registered.OIDCUsernameClaim = appState.OIDC.Config.UsernameClaim
+			registered.OIDCGroupsClaim = appState.OIDC.Config.GroupsClaim
+			registered.OIDCScopes = appState.OIDC.Config.Scopes
+			registered.OIDCCertificate = appState.OIDC.Config.Certificate
+
+			hooks["OIDC"] = appState.OIDC.Init
+			appState.Logger.Log(logrus.InfoLevel, "registereing OIDC runtime overrides hooks")
+		}
+
 		cm, err := configRuntime.NewConfigManager(
 			appState.ServerConfig.Config.RuntimeOverrides.Path,
 			config.ParseRuntimeConfig,
@@ -1794,6 +1810,7 @@ func initRuntimeOverrides(appState *state.State) {
 			registered,
 			appState.ServerConfig.Config.RuntimeOverrides.LoadInterval,
 			appState.Logger,
+			hooks,
 			prometheus.DefaultRegisterer)
 		if err != nil {
 			appState.Logger.WithField("action", "startup").WithError(err).Fatal("could not create runtime config manager")
