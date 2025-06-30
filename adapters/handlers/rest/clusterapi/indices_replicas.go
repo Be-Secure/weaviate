@@ -87,8 +87,6 @@ var (
 		`\/shards\/(` + sh + `)\/objects`)
 	regxReferences = regexp.MustCompile(`\/replicas\/indices\/(` + cl + `)` +
 		`\/shards\/(` + sh + `)\/objects/references`)
-	regxIncreaseRepFactor = regexp.MustCompile(`\/replicas\/indices\/(` + cl + `)` +
-		`\/replication-factor:increase`)
 	regxCommitPhase = regexp.MustCompile(`\/replicas\/indices\/(` + cl + `)` +
 		`\/shards\/(` + sh + `):(commit|abort)`)
 )
