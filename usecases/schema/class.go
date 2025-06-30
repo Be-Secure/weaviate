@@ -272,6 +272,11 @@ func UpdateClassInternal(h *Handler, ctx context.Context, className string, upda
 		return err
 	}
 
+	if initial := h.schemaReader.ReadOnlyClass(className); initial != nil {
+		if err := validateImmutableFields(initial, updated); err != nil {
+			return err
+		}
+	}
 	// A nil sharding state means that the sharding state will not be updated.
 	_, err := h.schemaManager.UpdateClass(ctx, updated, nil)
 	return err
