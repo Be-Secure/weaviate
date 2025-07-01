@@ -18,6 +18,7 @@ import (
 	"testing"
 	"time"
 
+	logrus "github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -107,7 +108,8 @@ func TestService_Usage_SingleTenant(t *testing.T) {
 	mockBackupProvider := backupusecase.NewMockBackupBackendProvider(t)
 	mockBackupProvider.EXPECT().EnabledBackupBackends().Return([]modulecapabilities.BackupBackend{})
 
-	service := NewService(mockSchema, mockDB, mockBackupProvider)
+	logger, _ := logrus.NewNullLogger()
+	service := NewService(mockSchema, mockDB, mockBackupProvider, logger)
 
 	result, err := service.Usage(ctx)
 
@@ -231,7 +233,8 @@ func TestService_Usage_MultiTenant_HotAndCold(t *testing.T) {
 	mockBackupProvider := backupusecase.NewMockBackupBackendProvider(t)
 	mockBackupProvider.EXPECT().EnabledBackupBackends().Return([]modulecapabilities.BackupBackend{})
 
-	service := NewService(mockSchema, mockDB, mockBackupProvider)
+	logger, _ := logrus.NewNullLogger()
+	service := NewService(mockSchema, mockDB, mockBackupProvider, logger)
 
 	result, err := service.Usage(ctx)
 
@@ -333,7 +336,8 @@ func TestService_Usage_WithBackups(t *testing.T) {
 	mockBackupProvider := backupusecase.NewMockBackupBackendProvider(t)
 	mockBackupProvider.EXPECT().EnabledBackupBackends().Return([]modulecapabilities.BackupBackend{mockBackupBackend})
 
-	service := NewService(mockSchema, mockDB, mockBackupProvider)
+	logger, _ := logrus.NewNullLogger()
+	service := NewService(mockSchema, mockDB, mockBackupProvider, logger)
 
 	result, err := service.Usage(ctx)
 
@@ -452,7 +456,8 @@ func TestService_Usage_WithNamedVectors(t *testing.T) {
 	mockBackupProvider := backupusecase.NewMockBackupBackendProvider(t)
 	mockBackupProvider.EXPECT().EnabledBackupBackends().Return([]modulecapabilities.BackupBackend{})
 
-	service := NewService(mockSchema, mockDB, mockBackupProvider)
+	logger, _ := logrus.NewNullLogger()
+	service := NewService(mockSchema, mockDB, mockBackupProvider, logger)
 
 	result, err := service.Usage(ctx)
 
@@ -521,7 +526,8 @@ func TestService_Usage_EmptyCollections(t *testing.T) {
 	mockBackupProvider := backupusecase.NewMockBackupBackendProvider(t)
 	mockBackupProvider.EXPECT().EnabledBackupBackends().Return([]modulecapabilities.BackupBackend{})
 
-	service := NewService(mockSchema, mockDB, mockBackupProvider)
+	logger, _ := logrus.NewNullLogger()
+	service := NewService(mockSchema, mockDB, mockBackupProvider, logger)
 
 	result, err := service.Usage(ctx)
 
@@ -555,7 +561,8 @@ func TestService_Usage_BackupError(t *testing.T) {
 	mockBackupProvider := backupusecase.NewMockBackupBackendProvider(t)
 	mockBackupProvider.EXPECT().EnabledBackupBackends().Return([]modulecapabilities.BackupBackend{mockBackupBackend})
 
-	service := NewService(mockSchema, mockDB, mockBackupProvider)
+	logger, _ := logrus.NewNullLogger()
+	service := NewService(mockSchema, mockDB, mockBackupProvider, logger)
 
 	result, err := service.Usage(ctx)
 
@@ -640,7 +647,8 @@ func TestService_Usage_VectorIndexError(t *testing.T) {
 	mockBackupProvider := backupusecase.NewMockBackupBackendProvider(t)
 	mockBackupProvider.EXPECT().EnabledBackupBackends().Return([]modulecapabilities.BackupBackend{})
 
-	service := NewService(mockSchema, mockDB, mockBackupProvider)
+	logger, _ := logrus.NewNullLogger()
+	service := NewService(mockSchema, mockDB, mockBackupProvider, logger)
 
 	result, err := service.Usage(ctx)
 
@@ -740,7 +748,8 @@ func TestService_Usage_NilVectorIndexConfig(t *testing.T) {
 	mockBackupProvider := backupusecase.NewMockBackupBackendProvider(t)
 	mockBackupProvider.EXPECT().EnabledBackupBackends().Return([]modulecapabilities.BackupBackend{})
 
-	service := NewService(mockSchema, mockDB, mockBackupProvider)
+	logger, _ := logrus.NewNullLogger()
+	service := NewService(mockSchema, mockDB, mockBackupProvider, logger)
 
 	result, err := service.Usage(ctx)
 
@@ -871,7 +880,8 @@ func TestService_Usage_VectorStorageSize(t *testing.T) {
 	mockBackupProvider := backupusecase.NewMockBackupBackendProvider(t)
 	mockBackupProvider.EXPECT().EnabledBackupBackends().Return([]modulecapabilities.BackupBackend{})
 
-	service := NewService(mockSchema, mockDB, mockBackupProvider)
+	logger, _ := logrus.NewNullLogger()
+	service := NewService(mockSchema, mockDB, mockBackupProvider, logger)
 
 	result, err := service.Usage(ctx)
 

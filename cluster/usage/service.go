@@ -15,6 +15,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/weaviate/weaviate/adapters/repos/db"
 	backupent "github.com/weaviate/weaviate/entities/backup"
 	"github.com/weaviate/weaviate/entities/models"
@@ -32,13 +34,15 @@ type service struct {
 	schemaManager schema.SchemaGetter
 	db            db.IndexGetter
 	backups       backup.BackupBackendProvider
+	logger        logrus.FieldLogger
 }
 
-func NewService(schemaManager schema.SchemaGetter, db db.IndexGetter, backups backup.BackupBackendProvider) Service {
+func NewService(schemaManager schema.SchemaGetter, db db.IndexGetter, backups backup.BackupBackendProvider, logger logrus.FieldLogger) Service {
 	return &service{
 		schemaManager: schemaManager,
 		db:            db,
 		backups:       backups,
+		logger:        logger,
 	}
 }
 
@@ -148,20 +152,25 @@ func (m *service) Usage(ctx context.Context) (*Report, error) {
 
 	// Get backup usage from all enabled backup backends
 	for _, backend := range m.backups.EnabledBackupBackends() {
+		m.logger.WithFields(logrus.Fields{"backend": backend}).Debug("collecting backup usage from backend")
 		backups, err := backend.AllBackups(ctx)
-		if err == nil {
-			for _, backup := range backups {
-				if backup.Status != backupent.Success {
-					continue
-				}
-				usage.Backups = append(usage.Backups, &BackupUsage{
-					ID:             backup.ID,
-					CompletionTime: backup.CompletedAt.Format(time.RFC3339),
-					SizeInGib:      float64(backup.PreCompressionSizeBytes) / (1024 * 1024 * 1024), // Convert bytes to GiB
-					Type:           string(backup.Status),
-					Collections:    backup.Classes(),
-				})
+		if err != nil {
+			m.logger.WithError(err).WithFields(logrus.Fields{"backend": backend}).Error("failed to get backups from backend")
+			continue
+		}
+
+		for _, backup := range backups {
+			if backup.Status != backupent.Success {
+				m.logger.WithFields(logrus.Fields{"backup": backup.ID, "status": backup.Status, "backup_error": backup.Error}).Debug("skipping backup with status other than success")
+				continue
 			}
+			usage.Backups = append(usage.Backups, &BackupUsage{
+				ID:             backup.ID,
+				CompletionTime: backup.CompletedAt.Format(time.RFC3339),
+				SizeInGib:      float64(backup.PreCompressionSizeBytes) / (1024 * 1024 * 1024), // Convert bytes to GiB
+				Type:           string(backup.Status),
+				Collections:    backup.Classes(),
+			})
 		}
 	}
 	return usage, nil
