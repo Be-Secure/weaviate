@@ -154,12 +154,14 @@ func (m *service) Usage(ctx context.Context) (*Report, error) {
 	for _, backend := range m.backups.EnabledBackupBackends() {
 		m.logger.WithFields(logrus.Fields{"backend": backend.Name()}).Debug("collecting backup usage from backend")
 		backups, err := backend.AllBackups(ctx)
+		m.logger.WithFields(logrus.Fields{"backups": backups}).Debug("all backups")
 		if err != nil {
 			m.logger.WithError(err).WithFields(logrus.Fields{"backend": backend}).Error("failed to get backups from backend")
 			continue
 		}
 
 		for _, backup := range backups {
+			m.logger.WithFields(logrus.Fields{"backup": backup.ID, "status": backup.Status, "backup_error": backup.Error}).Debug("found backup")
 			if backup.Status != backupent.Success {
 				m.logger.WithFields(logrus.Fields{"backup": backup.ID, "status": backup.Status, "backup_error": backup.Error}).Debug("skipping backup with status other than success")
 				continue
