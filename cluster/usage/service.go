@@ -152,7 +152,7 @@ func (m *service) Usage(ctx context.Context) (*Report, error) {
 
 	// Get backup usage from all enabled backup backends
 	for _, backend := range m.backups.EnabledBackupBackends() {
-		m.logger.WithFields(logrus.Fields{"backend": backend}).Debug("collecting backup usage from backend")
+		m.logger.WithFields(logrus.Fields{"backend": backend.Name()}).Debug("collecting backup usage from backend")
 		backups, err := backend.AllBackups(ctx)
 		if err != nil {
 			m.logger.WithError(err).WithFields(logrus.Fields{"backend": backend}).Error("failed to get backups from backend")
@@ -171,7 +171,10 @@ func (m *service) Usage(ctx context.Context) (*Report, error) {
 				Type:           string(backup.Status),
 				Collections:    backup.Classes(),
 			})
+
+			m.logger.WithFields(logrus.Fields{"backup": backup.ID, "status": backup.Status, "backup_error": backup.Error}).Debug("backup usage collected")
 		}
+
 	}
 	return usage, nil
 }
