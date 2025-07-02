@@ -24,6 +24,7 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/googleapis/gax-go/v2"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
@@ -115,10 +116,12 @@ func (g *gcsClient) HomeDir(backupID, overrideBucket, overridePath string) strin
 
 func (g *gcsClient) AllBackups(ctx context.Context) ([]*backup.DistributedBackupDescriptor, error) {
 	var meta []*backup.DistributedBackupDescriptor
+	logrus.Debugf("debug-backup-gcs: AllBackups: %v", g.config.BackupPath)
 	bucket, err := g.findBucket(ctx, "")
 	if err != nil {
 		return nil, fmt.Errorf("find bucket: %w", err)
 	}
+	logrus.Debugf("debug-backup-gcs: bucket: %v", bucket)
 	if bucket == nil {
 		return nil, nil
 	}
@@ -132,6 +135,8 @@ func (g *gcsClient) AllBackups(ctx context.Context) ([]*backup.DistributedBackup
 		if err != nil {
 			return nil, fmt.Errorf("get next object: %w", err)
 		}
+
+		logrus.Debugf("debug-backup-gcs: next: %v", next.Name)
 		if strings.Contains(next.Name, ubak.GlobalBackupFile) {
 			contents, err := g.getObject(ctx, bucket, next.Name)
 			if err != nil {
